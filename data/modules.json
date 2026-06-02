@@ -1,0 +1,62 @@
+{
+  "modules": [
+    {
+      "id": "M001",
+      "name": "BaseModule",
+      "description": "基础控制模块",
+      "category": "通用",
+      "functionBlocks": [
+        {"name": "Init", "type": "FB", "interface": {"inputs": [], "outputs": [{"name": "Done", "type": "BOOL"}]}},
+        {"name": "Reset", "type": "FB", "interface": {"inputs": [{"name": "Trigger", "type": "BOOL"}], "outputs": [{"name": "Done", "type": "BOOL"}]}}
+      ]
+    },
+    {
+      "id": "M002",
+      "name": "FeedModule",
+      "description": "上料控制模块",
+      "category": "工艺",
+      "functionBlocks": [
+        {"name": "StartFeed", "type": "FB", "interface": {"inputs": [{"name": "Start", "type": "BOOL"}], "outputs": [{"name": "Complete", "type": "BOOL"}, {"name": "Error", "type": "BOOL"}]}},
+        {"name": "StopFeed", "type": "FB", "interface": {"inputs": [{"name": "Stop", "type": "BOOL"}], "outputs": [{"name": "Done", "type": "BOOL"}]}}
+      ]
+    },
+    {
+      "id": "M003",
+      "name": "ProcessModule",
+      "description": "加工控制模块",
+      "category": "工艺",
+      "functionBlocks": [
+        {"name": "StartProcess", "type": "FB", "interface": {"inputs": [{"name": "Start", "type": "BOOL"}, {"name": "Speed", "type": "INT"}], "outputs": [{"name": "Complete", "type": "BOOL"}, {"name": "Progress", "type": "INT"}]}}
+      ]
+    },
+    {
+      "id": "M004",
+      "name": "CoolantModule",
+      "description": "冷却液控制模块",
+      "category": "辅助",
+      "functionBlocks": [
+        {"name": "CoolantOn", "type": "FB", "interface": {"inputs": [{"name": "Enable", "type": "BOOL"}], "outputs": [{"name": "Running", "type": "BOOL"}]}},
+        {"name": "CoolantOff", "type": "FB", "interface": {"inputs": [{"name": "Disable", "type": "BOOL"}], "outputs": [{"name": "Stopped", "type": "BOOL"}]}}
+      ]
+    },
+    {
+      "id": "M005",
+      "name": "InspectModule",
+      "description": "检测控制模块",
+      "category": "检测",
+      "functionBlocks": [
+        {"name": "StartInspect", "type": "FB", "interface": {"inputs": [{"name": "Start", "type": "BOOL"}], "outputs": [{"name": "Pass", "type": "BOOL"}, {"name": "Fail", "type": "BOOL"}, {"name": "Result", "type": "STRING"}]}}
+      ]
+    },
+    {
+      "id": "M006",
+      "name": "UnloadModule",
+      "description": "下料控制模块",
+      "category": "工艺",
+      "functionBlocks": [
+        {"name": "StartUnload", "type": "FB", "interface": {"inputs": [{"name": "Start", "type": "BOOL"}], "outputs": [{"name": "Complete", "type": "BOOL"}]}},
+        {"name": "Sort", "type": "FB", "interface": {"inputs": [{"name": "Quality", "type": "BOOL"}], "outputs": [{"name": "Good", "type": "BOOL"}, {"name": "Bad", "type": "BOOL"}]}}
+      ]
+    }
+  ]
+}

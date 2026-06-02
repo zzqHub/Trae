@@ -1,0 +1,32 @@
+{
+  "stations": [
+    {
+      "id": "ST001",
+      "name": "上料工位",
+      "description": "自动上料装置",
+      "modules": ["M001", "M002"],
+      "order": 1
+    },
+    {
+      "id": "ST002",
+      "name": "加工工位",
+      "description": "CNC加工中心",
+      "modules": ["M001", "M003", "M004"],
+      "order": 2
+    },
+    {
+      "id": "ST003",
+      "name": "检测工位",
+      "description": "质量检测装置",
+      "modules": ["M001", "M005"],
+      "order": 3
+    },
+    {
+      "id": "ST004",
+      "name": "下料工位",
+      "description": "自动下料装置",
+      "modules": ["M001", "M006"],
+      "order": 4
+    }
+  ]
+}

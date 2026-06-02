@@ -1,0 +1,29 @@
+{
+  "ioPoints": [
+    {"id": "I0.0", "name": "StartButton", "type": "DI", "description": "启动按钮", "station": "ST001", "module": "M002"},
+    {"id": "I0.1", "name": "StopButton", "type": "DI", "description": "停止按钮", "station": "ST001", "module": "M002"},
+    {"id": "I0.2", "name": "Sensor1", "type": "DI", "description": "物料检测传感器", "station": "ST001", "module": "M002"},
+    {"id": "I0.3", "name": "LimitSwitch", "type": "DI", "description": "限位开关", "station": "ST001", "module": "M002"},
+    {"id": "I1.0", "name": "ProcessStart", "type": "DI", "description": "加工启动", "station": "ST002", "module": "M003"},
+    {"id": "I1.1", "name": "EmergencyStop", "type": "DI", "description": "急停按钮", "station": "ST002", "module": "M001"},
+    {"id": "I1.2", "name": "DoorSwitch", "type": "DI", "description": "安全门开关", "station": "ST002", "module": "M001"},
+    {"id": "I2.0", "name": "InspectStart", "type": "DI", "description": "检测启动", "station": "ST003", "module": "M005"},
+    {"id": "I2.1", "name": "InspectComplete", "type": "DI", "description": "检测完成", "station": "ST003", "module": "M005"},
+    {"id": "I3.0", "name": "UnloadStart", "type": "DI", "description": "下料启动", "station": "ST004", "module": "M006"},
+    {"id": "I3.1", "name": "ConveyorReady", "type": "DI", "description": "传送带就绪", "station": "ST004", "module": "M006"},
+    {"id": "Q0.0", "name": "FeedMotor", "type": "DO", "description": "上料电机", "station": "ST001", "module": "M002"},
+    {"id": "Q0.1", "name": "FeedSolenoid", "type": "DO", "description": "上料电磁阀", "station": "ST001", "module": "M002"},
+    {"id": "Q0.2", "name": "FeedIndicator", "type": "DO", "description": "上料指示灯", "station": "ST001", "module": "M002"},
+    {"id": "Q1.0", "name": "SpindleMotor", "type": "DO", "description": "主轴电机", "station": "ST002", "module": "M003"},
+    {"id": "Q1.1", "name": "CoolantPump", "type": "DO", "description": "冷却泵", "station": "ST002", "module": "M004"},
+    {"id": "Q1.2", "name": "ProcessIndicator", "type": "DO", "description": "加工指示灯", "station": "ST002", "module": "M003"},
+    {"id": "Q2.0", "name": "InspectLight", "type": "DO", "description": "检测光源", "station": "ST003", "module": "M005"},
+    {"id": "Q2.1", "name": "PassIndicator", "type": "DO", "description": "合格指示灯", "station": "ST003", "module": "M005"},
+    {"id": "Q2.2", "name": "FailIndicator", "type": "DO", "description": "不合格指示灯", "station": "ST003", "module": "M005"},
+    {"id": "Q3.0", "name": "UnloadMotor", "type": "DO", "description": "下料电机", "station": "ST004", "module": "M006"},
+    {"id": "Q3.1", "name": "SortGate", "type": "DO", "description": "分拣闸门", "station": "ST004", "module": "M006"},
+    {"id": "IW0", "name": "SpeedSet", "type": "AI", "description": "速度设定值", "station": "ST002", "module": "M003"},
+    {"id": "IW1", "name": "PressureSensor", "type": "AI", "description": "压力传感器", "station": "ST002", "module": "M003"},
+    {"id": "QW0", "name": "DisplayValue", "type": "AO", "description": "显示输出", "station": "ST003", "module": "M005"}
+  ]
+}

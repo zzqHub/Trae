@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PLCopenXML生成系统</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f7fa; }
+    .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 16px 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .header h1 { font-size: 20px; font-weight: 600; }
+    .header p { font-size: 14px; opacity: 0.9; margin-top: 4px; }
+    
+    .container { display: flex; height: calc(100vh - 80px); }
+    .sidebar { width: 220px; background: white; border-right: 1px solid #e0e0e0; padding: 16px; }
+    .sidebar button { display: block; width: 100%; padding: 12px 16px; margin-bottom: 8px; border: none; border-radius: 8px; background: #f5f7fa; color: #333; font-size: 14px; cursor: pointer; transition: all 0.2s; text-align: left; }
+    .sidebar button:hover { background: #e8eaed; }
+    .sidebar button.active { background: #667eea; color: white; }
+    
+    .main { flex: 1; padding: 20px; overflow-y: auto; }
+    .card { background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); padding: 20px; margin-bottom: 20px; }
+    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .card-title { font-size: 18px; font-weight: 600; color: #333; }
+    .btn { padding: 8px 16px; border-radius: 6px; font-size: 14px; cursor: pointer; border: none; transition: all 0.2s; }
+    .btn-primary { background: #667eea; color: white; }
+    .btn-primary:hover { background: #5a6fd6; }
+    .btn-danger { background: #ff4757; color: white; }
+    .btn-danger:hover { background: #e63950; }
+    .btn-secondary { background: #f5f7fa; color: #333; }
+    .btn-secondary:hover { background: #e8eaed; }
+    
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #e0e0e0; }
+    th { background: #f5f7fa; font-weight: 600; color: #666; }
+    tr:hover { background: #fafafa; }
+    
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 6px; color: #333; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px 12px; border: 1px solid #e0e0e0; border-radius: 6px; font-size: 14px; }
+    .form-group textarea { resize: vertical; min-height: 80px; }
+    
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; }
+    .modal.show { display: flex; }
+    .modal-content { background: white; border-radius: 12px; width: 90%; max-width: 500px; padding: 24px; max-height: 80vh; overflow-y: auto; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .modal-title { font-size: 18px; font-weight: 600; }
+    .modal-close { width: 32px; height: 32px; border-radius: 50%; border: none; background: #f5f7fa; cursor: pointer; font-size: 20px; }
+    
+    .tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+    .tab { padding: 8px 16px; border-radius: 6px; background: #f5f7fa; cursor: pointer; font-size: 14px; transition: all 0.2s; }
+    .tab.active { background: #667eea; color: white; }
+    
+    .drag-handle { cursor: move; color: #999; padding-right: 8px; }
+    .order-controls { display: flex; gap: 4px; }
+    .order-btn { width: 24px; height: 24px; border: none; background: #f5f7fa; border-radius: 4px; cursor: pointer; }
+    .order-btn:hover { background: #e8eaed; }
+    
+    .upload-area { border: 2px dashed #ddd; border-radius: 8px; padding: 32px; text-align: center; cursor: pointer; transition: all 0.2s; }
+    .upload-area:hover { border-color: #667eea; background: #fafafa; }
+    .upload-area.dragover { border-color: #667eea; background: #f0f4ff; }
+    
+    .status { padding: 8px 12px; border-radius: 4px; font-size: 13px; margin-top: 8px; }
+    .status.success { background: #d4edda; color: #155724; }
+    .status.error { background: #f8d7da; color: #721c24; }
+    
+    .plc-preview { background: #1e1e1e; color: #d4d4d4; padding: 16px; border-radius: 8px; font-family: 'Consolas', monospace; font-size: 12px; overflow-x: auto; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>PLCopenXML生成系统</h1>
+    <p>工位配置 · 控制模块 · IO表管理 · XML导出</p>
+  </div>
+  
+  <div class="container">
+    <div class="sidebar">
+      <button id="tab-stations" class="active">工位配置</button>
+      <button id="tab-modules">控制模块</button>
+      <button id="tab-io">IO表</button>
+      <button id="tab-generate">生成XML</button>
+    </div>
+    
+    <div class="main">
+      <div id="panel-stations" class="panel">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">工位列表</span>
+            <button class="btn btn-primary" onclick="showStationModal()">+ 添加工位</button>
+          </div>
+          <table id="stations-table">
+            <thead>
+              <tr>
+                <th>顺序</th>
+                <th>ID</th>
+                <th>名称</th>
+                <th>描述</th>
+                <th>模块数</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+      
+      <div id="panel-modules" class="panel" style="display:none">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">控制模块</span>
+            <button class="btn btn-primary" onclick="showModuleModal()">+ 添加模块</button>
+          </div>
+          <table id="modules-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>名称</th>
+                <th>描述</th>
+                <th>类别</th>
+                <th>功能块数</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+      
+      <div id="panel-io" class="panel" style="display:none">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">IO表管理</span>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-primary" onclick="showIoModal()">+ 添加IO点</button>
+              <button class="btn btn-secondary" onclick="exportIoTable()">导出Excel</button>
+            </div>
+          </div>
+          
+          <div class="upload-area" id="upload-area" onclick="document.getElementById('file-input').click()">
+            <input type="file" id="file-input" accept=".xlsx,.xls" style="display:none" onchange="importIoTable()">
+            <div style="font-size: 24px; margin-bottom: 8px;">📥</div>
+            <div style="font-size: 16px; font-weight: 500; margin-bottom: 4px;">点击或拖拽上传IO表</div>
+            <div style="font-size: 14px; color: #666;">支持 .xlsx / .xls 格式</div>
+          </div>
+          
+          <table id="io-table">
+            <thead>
+              <tr>
+                <th>地址</th>
+                <th>名称</th>
+                <th>类型</th>
+                <th>描述</th>
+                <th>工位</th>
+                <th>模块</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+      
+      <div id="panel-generate" class="panel" style="display:none">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">PLCopenXML 生成</span>
+            <button class="btn btn-primary" onclick="generateXml()">生成并下载XML</button>
+          </div>
+          
+          <div style="margin-bottom: 16px;">
+            <h3 style="margin-bottom: 8px;">预览配置摘要</h3>
+            <div style="display: flex; gap: 24px;">
+              <div><strong>工位数量:</strong> <span id="stat-stations">0</span></div>
+              <div><strong>模块数量:</strong> <span id="stat-modules">0</span></div>
+              <div><strong>IO点数量:</strong> <span id="stat-io">0</span></div>
+            </div>
+          </div>
+          
+          <div style="margin-top: 16px;">
+            <h3 style="margin-bottom: 8px;">XML预览</h3>
+            <div class="plc-preview" id="xml-preview"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="modal" id="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <span class="modal-title" id="modal-title"></span>
+        <button class="modal-close" onclick="closeModal()">×</button>
+      </div>
+      <form id="modal-form">
+        <div id="modal-body"></div>
+        <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px;">
+          <button type="button" class="btn btn-secondary" onclick="closeModal()">取消</button>
+          <button type="submit" class="btn btn-primary">保存</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  
+  <script>
+    let stations = [], modules = [], ioPoints = [];
+    let currentEditType = '', currentEditId = '';
+    
+    async function loadData() {
+      stations = await fetch('/api/station').then(r => r.json());
+      modules = await fetch('/api/module').then(r => r.json());
+      ioPoints = await fetch('/api/io').then(r => r.json());
+      renderStations();
+      renderModules();
+      renderIoTable();
+      updateStats();
+    }
+    
+    function renderStations() {
+      const tbody = document.querySelector('#stations-table tbody');
+      tbody.innerHTML = stations.map(s => `
+        <tr>
+          <td>
+            <div class="order-controls">
+              <button class="order-btn" onclick="moveStation('${s.id}', -1)">↑</button>
+              <span>${s.order}</span>
+              <button class="order-btn" onclick="moveStation('${s.id}', 1)">↓</button>
+            </div>
+          </td>
+          <td>${s.id}</td>
+          <td>${s.name}</td>
+          <td>${s.description}</td>
+          <td>${s.modules?.length || 0}</td>
+          <td>
+            <button class="btn btn-secondary" onclick="editStation('${s.id}')">编辑</button>
+            <button class="btn btn-danger" onclick="deleteStation('${s.id}')">删除</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+    
+    function renderModules() {
+      const tbody = document.querySelector('#modules-table tbody');
+      tbody.innerHTML = modules.map(m => `
+        <tr>
+          <td>${m.id}</td>
+          <td>${m.name}</td>
+          <td>${m.description}</td>
+          <td>${m.category}</td>
+          <td>${m.functionBlocks?.length || 0}</td>
+          <td>
+            <button class="btn btn-secondary" onclick="editModule('${m.id}')">编辑</button>
+            <button class="btn btn-danger" onclick="deleteModule('${m.id}')">删除</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+    
+    function renderIoTable() {
+      const tbody = document.querySelector('#io-table tbody');
+      tbody.innerHTML = ioPoints.map(i => `
+        <tr>
+          <td>${i.id}</td>
+          <td>${i.name}</td>
+          <td>${i.type}</td>
+          <td>${i.description}</td>
+          <td>${i.station}</td>
+          <td>${i.module}</td>
+          <td>
+            <button class="btn btn-secondary" onclick="editIo('${i.id}')">编辑</button>
+            <button class="btn btn-danger" onclick="deleteIo('${i.id}')">删除</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+    
+    function showStationModal(id = null) {
+      currentEditType = 'station';
+      currentEditId = id;
+      document.getElementById('modal-title').textContent = id ? '编辑工位' : '添加工位';
+      
+      const station = id ? stations.find(s => s.id === id) : {};
+      document.getElementById('modal-body').innerHTML = `
+        <div class="form-group">
+          <label>工位名称</label>
+          <input name="name" value="${station.name || ''}" required>
+        </div>
+        <div class="form-group">
+          <label>描述</label>
+          <textarea name="description">${station.description || ''}</textarea>
+        </div>
+        <div class="form-group">
+          <label>关联模块 (逗号分隔ID)</label>
+          <input name="modules" value="${station.modules?.join(',') || ''}">
+        </div>
+      `;
+      document.getElementById('modal').classList.add('show');
+    }
+    
+    function showModuleModal(id = null) {
+      currentEditType = 'module';
+      currentEditId = id;
+      document.getElementById('modal-title').textContent = id ? '编辑模块' : '添加模块';
+      
+      const module = id ? modules.find(m => m.id === id) : {};
+      document.getElementById('modal-body').innerHTML = `
+        <div class="form-group">
+          <label>模块名称</label>
+          <input name="name" value="${module.name || ''}" required>
+        </div>
+        <div class="form-group">
+          <label>描述</label>
+          <textarea name="description">${module.description || ''}</textarea>
+        </div>
+        <div class="form-group">
+          <label>类别</label>
+          <select name="category">
+            <option value="通用" ${module.category === '通用' ? 'selected' : ''}>通用</option>
+            <option value="工艺" ${module.category === '工艺' ? 'selected' : ''}>工艺</option>
+            <option value="辅助" ${module.category === '辅助' ? 'selected' : ''}>辅助</option>
+            <option value="检测" ${module.category === '检测' ? 'selected' : ''}>检测</option>
+          </select>
+        </div>
+      `;
+      document.getElementById('modal').classList.add('show');
+    }
+    
+    function showIoModal(id = null) {
+      currentEditType = 'io';
+      currentEditId = id;
+      document.getElementById('modal-title').textContent = id ? '编辑IO点' : '添加IO点';
+      
+      const io = id ? ioPoints.find(i => i.id === id) : {};
+      document.getElementById('modal-body').innerHTML = `
+        <div class="form-group">
+          <label>地址</label>
+          <input name="id" value="${io.id || ''}" required>
+        </div>
+        <div class="form-group">
+          <label>名称</label>
+          <input name="name" value="${io.name || ''}" required>
+        </div>
+        <div class="form-group">
+          <label>类型</label>
+          <select name="type">
+            <option value="DI" ${io.type === 'DI' ? 'selected' : ''}>DI (数字输入)</option>
+            <option value="DO" ${io.type === 'DO' ? 'selected' : ''}>DO (数字输出)</option>
+            <option value="AI" ${io.type === 'AI' ? 'selected' : ''}>AI (模拟输入)</option>
+            <option value="AO" ${io.type === 'AO' ? 'selected' : ''}>AO (模拟输出)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>描述</label>
+          <input name="description" value="${io.description || ''}">
+        </div>
+        <div class="form-group">
+          <label>工位</label>
+          <input name="station" value="${io.station || ''}">
+        </div>
+        <div class="form-group">
+          <label>模块</label>
+          <input name="module" value="${io.module || ''}">
+        </div>
+      `;
+      document.getElementById('modal').classList.add('show');
+    }
+    
+    function closeModal() {
+      document.getElementById('modal').classList.remove('show');
+      document.getElementById('modal-form').reset();
+      currentEditType = '';
+      currentEditId = '';
+    }
+    
+    document.getElementById('modal-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const data = Object.fromEntries(formData.entries());
+      
+      if (currentEditType === 'station') {
+        data.modules = data.modules.split(',').map(s => s.trim()).filter(Boolean);
+        if (currentEditId) {
+          await fetch(`/api/station/${currentEditId}`, { method: 'PUT', body: JSON.stringify(data), headers: { 'Content-Type': 'application/json' } });
+        } else {
+          await fetch('/api/station', { method: 'POST', body: JSON.stringify(data), headers: { 'Content-Type': 'application/json' } });
+        }
+      } else if (currentEditType === 'module') {
+        if (currentEditId) {
+          await fetch(`/api/module/${currentEditId}`, { method: 'PUT', body: JSON.stringify(data), headers: { 'Content-Type': 'application/json' } });
+        } else {
+          await fetch('/api/module', { method: 'POST', body: JSON.stringify(data), headers: { 'Content-Type': 'application/json' } });
+        }
+      } else if (currentEditType === 'io') {
+        if (currentEditId) {
+          await fetch(`/api/io/${currentEditId}`, { method: 'PUT', body: JSON.stringify(data), headers: { 'Content-Type': 'application/json' } });
+        } else {
+          await fetch('/api/io', { method: 'POST', body: JSON.stringify(data), headers: { 'Content-Type': 'application/json' } });
+        }
+      }
+      
+      closeModal();
+      await loadData();
+    });
+    
+    async function deleteStation(id) {
+      if (!confirm('确定删除此工位？')) return;
+      await fetch(`/api/station/${id}`, { method: 'DELETE' });
+      await loadData();
+    }
+    
+    async function deleteModule(id) {
+      if (!confirm('确定删除此模块？')) return;
+      await fetch(`/api/module/${id}`, { method: 'DELETE' });
+      await loadData();
+    }
+    
+    async function deleteIo(id) {
+      if (!confirm('确定删除此IO点？')) return;
+      await fetch(`/api/io/${id}`, { method: 'DELETE' });
+      await loadData();
+    }
+    
+    async function moveStation(id, direction) {
+      const station = stations.find(s => s.id === id);
+      if (!station) return;
+      let newOrder = station.order + direction;
+      newOrder = Math.max(1, Math.min(stations.length, newOrder));
+      if (newOrder !== station.order) {
+        await fetch(`/api/station/${id}/order`, { method: 'PUT', body: JSON.stringify({ newOrder }), headers: { 'Content-Type': 'application/json' } });
+        await loadData();
+      }
+    }
+    
+    async function importIoTable() {
+      const file = document.getElementById('file-input').files[0];
+      if (!file) return;
+      
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const res = await fetch('/api/io/import', { method: 'POST', body: formData });
+      const result = await res.json();
+      
+      const status = document.createElement('div');
+      status.className = res.error ? 'status error' : 'status success';
+      status.textContent = res.error || `${result.message} (${result.count}条记录)`;
+      document.getElementById('upload-area').insertAdjacentElement('afterend', status);
+      
+      if (!res.error) await loadData();
+      setTimeout(() => status.remove(), 3000);
+    }
+    
+    async function exportIoTable() {
+      window.location.href = '/api/io/export';
+    }
+    
+    function updateStats() {
+      document.getElementById('stat-stations').textContent = stations.length;
+      document.getElementById('stat-modules').textContent = modules.length;
+      document.getElementById('stat-io').textContent = ioPoints.length;
+    }
+    
+    async function generateXml() {
+      const res = await fetch('/api/plcopen/generateFromConfig', { method: 'POST' });
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'plcopen_project.xml';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+    
+    async function previewXml() {
+      const res = await fetch('/api/plcopen/preview');
+      const xml = await res.text();
+      document.getElementById('xml-preview').textContent = xml;
+    }
+    
+    document.querySelectorAll('.sidebar button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.sidebar button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelectorAll('.panel').forEach(p => p.style.display = 'none');
+        document.getElementById(`panel-${btn.id.replace('tab-', '')}`).style.display = 'block';
+        if (btn.id === 'tab-generate') previewXml();
+      });
+    });
+    
+    document.getElementById('upload-area').addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.target.classList.add('dragover');
+    });
+    
+    document.getElementById('upload-area').addEventListener('dragleave', (e) => {
+      e.target.classList.remove('dragover');
+    });
+    
+    document.getElementById('upload-area').addEventListener('drop', (e) => {
+      e.preventDefault();
+      e.target.classList.remove('dragover');
+      const file = e.dataTransfer.files[0];
+      if (file) {
+        document.getElementById('file-input').files = e.dataTransfer.files;
+        importIoTable();
+      }
+    });
+    
+    window.addEventListener('DOMContentLoaded', loadData);
+  </script>
+</body>
+</html>
