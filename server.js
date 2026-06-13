@@ -41,6 +41,17 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.listen(port, () => {
-  console.log(`服务器运行在 http://localhost:${port}`);
-});
+function startServer(startPort) {
+  const server = app.listen(startPort, '0.0.0.0', () => {
+    console.log(`服务器运行在 http://0.0.0.0:${startPort} (http://localhost:${startPort})`);
+  });
+  server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      console.log(`端口 ${startPort} 被占用，尝试 ${startPort + 1}...`);
+      startServer(startPort + 1);
+    } else {
+      console.error('服务器启动错误:', err);
+    }
+  });
+}
+startServer(port);
