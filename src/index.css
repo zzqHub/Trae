@@ -1,0 +1,96 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: 'JetBrains Mono', 'Sarasa Mono SC', Consolas, ui-monospace, monospace;
+  line-height: 1.55;
+  font-weight: 400;
+  color-scheme: dark;
+  color: #E5E8EC;
+  background-color: #0E1116;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html, body, #root { height: 100%; }
+body {
+  margin: 0;
+  background: #0E1116;
+  background-image:
+    radial-gradient(circle at 20% 0%, rgba(34, 211, 238, 0.06), transparent 40%),
+    radial-gradient(circle at 80% 100%, rgba(245, 158, 11, 0.04), transparent 40%),
+    linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 32px 32px, 32px 32px;
+  background-attachment: fixed;
+}
+
+/* 自定义滚动条 */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: #0E1116; }
+::-webkit-scrollbar-thumb { background: #2A3340; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #3A4554; }
+
+/* 通用组件 */
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-primary {
+    @apply btn bg-cyan-brand text-ink-950 hover:bg-cyan-brand/90 hover:shadow-glow;
+  }
+  .btn-danger {
+    @apply btn bg-red-signal text-white hover:bg-red-signal/90 hover:shadow-glow-red;
+  }
+  .btn-ghost {
+    @apply btn bg-transparent text-ink-200 border border-ink-600 hover:bg-ink-700 hover:text-ink-100;
+  }
+  .btn-amber {
+    @apply btn bg-amber-signal text-ink-950 hover:bg-amber-signal/90 hover:shadow-glow-amber;
+  }
+  .input {
+    @apply w-full bg-ink-950 border border-ink-600 rounded-md px-3 py-2 text-sm text-ink-100 placeholder:text-ink-500 focus:outline-none focus:border-cyan-brand focus:shadow-glow transition-all;
+  }
+  .card {
+    @apply bg-ink-850/80 border border-ink-700 rounded-lg backdrop-blur-sm;
+  }
+  .badge {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded;
+  }
+  .scrollbar-thin { scrollbar-width: thin; }
+}
+
+/* 节点类型徽标 */
+.node-prg    { @apply bg-cyan-deep/40 text-cyan-brand border border-cyan-brand/30; }
+.node-gvl    { @apply bg-violet-deep/40 text-violet-signal border border-violet-signal/30; }
+.node-fb     { @apply bg-amber-deep/40 text-amber-signal border border-amber-signal/30; }
+.node-fc     { @apply bg-green-deep/40 text-green-signal border border-green-signal/30; }
+.node-struct { @apply bg-ink-700 text-ink-200 border border-ink-500; }
+.node-var    { @apply bg-ink-800 text-ink-400 border border-ink-600; }
+
+/* 三色灯 */
+.traffic-light {
+  @apply inline-flex gap-1;
+}
+.traffic-light span {
+  @apply w-2 h-2 rounded-full bg-ink-600;
+}
+.traffic-light.on-red span:nth-child(1)    { @apply bg-red-signal shadow-glow-red; }
+.traffic-light.on-yellow span:nth-child(2) { @apply bg-amber-signal shadow-glow-amber; }
+.traffic-light.on-green span:nth-child(3)  { @apply bg-green-signal; }
+
+/* 扫描线动画 (代码生成时使用) */
+.scan-line::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent, rgba(34,211,238,0.18), transparent);
+  height: 80px;
+  animation: scan 2.5s linear infinite;
+  pointer-events: none;
+}
